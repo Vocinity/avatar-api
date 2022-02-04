@@ -67,7 +67,7 @@ def gen_uniq_video_id():
     return avatar_video_id
 
 '''
-Create video on synthesia
+Step1 Create video on synthesia
 '''
 def create_video_on_synthesia(text,avatar,background):
     request_headers = {
@@ -107,7 +107,7 @@ def create_video_on_synthesia(text,avatar,background):
     '''
 
 '''
- Pull video from synthesia
+Step2 Pull video from synthesia
 '''
 def get_video_from_synthesia(synthesia_id):
     request_headers = { 'Authorization' : synthesia_key }
@@ -120,12 +120,12 @@ def get_video_from_synthesia(synthesia_id):
 
 
 '''
-Step2 Crop video
+Step3 Crop video
 '''
 def crop_video(avatar_video_id):
     #cmd_rm = f"rm {downloads}/syn_{avatar_video_id}.mp4"
     #cmd_rm_result = subprocess.run(cmd_rm,stdout=subprocess.PIPE)
-    cmd = f'ffmpeg -i {downloads}/syn_{avatar_video_id}.mp4 -filter:v crop=608:1080:656:0 {tmp}/step2_{avatar_video_id}.mp4'
+    cmd = f'ffmpeg -i {downloads}/syn_{avatar_video_id}.mp4 -filter:v crop=608:1080:656:0 {tmp}/step3_{avatar_video_id}.mp4'
     cmd = cmd.split()
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
@@ -133,10 +133,10 @@ def crop_video(avatar_video_id):
     return cmd_result
 
 '''
-Step3 Add background color
+Step4 Add background
 '''
 def add_bg_color(avatar_video_id):
-    cmd=f'ffmpeg -i {tmp}/step2_{avatar_video_id}.mp4 -f lavfi -i color=0xadd8e6:s=608x1080 -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step3_{avatar_video_id}.mp4'
+    cmd = f'ffmpeg -i {tmp}/step3_{avatar_video_id}.mp4 -i {overlays}/background.png -f lavfi -i color=0xadd8e6:s=608x1080 -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step4_{avatar_video_id}.mp4'
     cmd = cmd.split()
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
@@ -145,10 +145,10 @@ def add_bg_color(avatar_video_id):
 
 
 '''
-Step4 Enhace Video
+Step5 Enhace Video
 '''
 def enhhace_video(avatar_video_id):
-    cmd=f"veai.exe --input {tmp}/step3_{avatar_video_id}.mp4 -m alq-12 -f mp4 --output {tmp}/step4_{avatar_video_id}.mp4"
+    cmd=f"veai.exe --input {tmp}/step4_{avatar_video_id}.mp4 -m alq-12 -f mp4 --output {tmp}/step5_{avatar_video_id}.mp4"
     cmd = cmd.split()
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
@@ -156,11 +156,11 @@ def enhhace_video(avatar_video_id):
     return cmd_result
 
 '''
-Step5 Add Overley
+Step6 Add Overley
 '''
 def adding_overlay(avatar_video_id, overlay_image):
-    cmd = f'ffmpeg -i {tmp}/step2_{avatar_video_id}.mp4 -i {overlays}/{overlay_image} -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step5_{avatar_video_id}.mp4'
-    #cmd = f'ffmpeg -i {tmp}/step4_{avatar_video_id}.mp4 -i {overlays}/{overlay_image} -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step5_{avatar_video_id}.mp4'
+    cmd = f'ffmpeg -i {tmp}/step4_{avatar_video_id}.mp4 -i {overlays}/{overlay_image} -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step6_{avatar_video_id}.mp4'
+    #cmd = f'ffmpeg -i {tmp}/step5_{avatar_video_id}.mp4 -i {overlays}/{overlay_image} -filter_complex [0:v]colorkey=0x2fc98b:0.01:0.5[ckout];[1:v][ckout]overlay[despill];[despill]despill=green[colorspace];[colorspace]format=yuv420p[out] -map [out] -map 0:a:0 {tmp}/step5_{avatar_video_id}.mp4'
     cmd = cmd.split()
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
@@ -169,10 +169,10 @@ def adding_overlay(avatar_video_id, overlay_image):
 
 
 '''
-Step6 Convert to WebM
+Step7 Convert to WebM
 '''
 def convert_to_webm(avatar_video_id):
-    cmd = 'ffmpeg -i {tmp}/step5_{avatar_video_id}.mp4 -c:v libvpx -quality best -auto-alt-ref 0 -g 24 -qmin 0 -qmax 12 -crf 5 -bufsize 6000 -rc_init_occupancy 200 -threads 7 -acodec opus -strict -2 {tmp}/step6_{avatar_video_id}.webm'
+    cmd = f'ffmpeg -i {tmp}/step6_{avatar_video_id}.mp4 -c:v libvpx -quality best -auto-alt-ref 0 -g 24 -qmin 0 -qmax 12 -crf 5 -b:v 2M -bufsize 6000 -rc_init_occupancy 200 -threads 7 -acodec opus -strict -2 {tmp}/step7_{avatar_video_id}.webm'
     cmd = cmd.split()
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
@@ -180,16 +180,27 @@ def convert_to_webm(avatar_video_id):
     return cmd_result
 
 '''
-Step7 Add Title
+Step8 Add Title
 '''
 def add_title(avatar_video_id, title_txt):
-    cmd = 'ffmpeg -i {tmp}/step6_{avatar_video_id}.webm -metadata title="{title_txt}" -codec copy {avatars}/avatar_{avatar_video_id}.webm'
-    cmd = cmd.split()
+    #cmd = f'ffmpeg -i {tmp}/step7_{avatar_video_id}.webm -metadata title="{title_txt}" -codec copy {avatars}/avatar_{avatar_video_id}.webm'
+    #cmd = cmd.split()
+    cmd = [
+        "ffmpeg", 
+        "-i", f"{tmp}/step7_{avatar_video_id}.webm",
+        "-metadata", f"title={title_txt}",
+        "-codec", "copy", f"{avatars}/avatar_{avatar_video_id}.webm"
+    ]
     print(cmd)
     cmd_result = subprocess.run(cmd,stdout=subprocess.PIPE)
     print(cmd_result)
     return cmd_result
 
+'''
+Step9 Push video to CallBack API
+'''
+def pusch_to_callback(uri):
+    return True
 
 '''
 API REST Endpoints
@@ -288,14 +299,18 @@ def avatar_daemon(q, thread_id):
         crop_res = crop_video(payload["avatar_video_id"])
         print(crop_res)
         print("[daemon] Step 4/9 | Add background")
-        #bg_res = add_bg_color(payload["avatar_video_id"])
-        #print(bg_res)
+        bg_res = add_bg_color(payload["avatar_video_id"])
+        print(bg_res)
         print("[daemon] Step 5/9 | Enhace Video")
         print("[daemon] Step 6/9 | Add Overlay")
         overlay_res = adding_overlay(payload["avatar_video_id"], payload["overlay"])
         print(overlay_res)
         print("[daemon] Step 7/9 | Convert to WebM")
+        overlay_res = convert_to_webm(payload["avatar_video_id"])
+        print(overlay_res)
         print("[daemon] Step 8/9 | Add Title")
+        overlay_res = add_title(payload["avatar_video_id"],payload["text"])
+        print(overlay_res)
         print("[daemon] Step 9/9 | Callback / Move video to folder")
         print("[daemon] Process finished")
 
