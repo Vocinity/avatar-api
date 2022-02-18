@@ -1,0 +1,1 @@
+powershell -c "python 'C:\Vocinity\avatar-api\server.py'"
