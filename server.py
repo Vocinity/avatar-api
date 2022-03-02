@@ -43,7 +43,7 @@ def avatar_daemon(payload):
     sleep_time = 15
 
     logging.debug("[avatar] [step 1/9] creating synthesia video")
-    synthesia_result = video.create_video_on_synthesia(payload["script_text"], payload["avatar"], payload["voice"])
+    synthesia_result = video.create_video_on_synthesia(payload["script_text"], payload["avatar"], payload["voice"], payload["test"])
     logging.debug(synthesia_result)
     if(synthesia_result['status'] == "error"):
         return synthesia_result
@@ -158,6 +158,15 @@ def create_avatar():
         }
     except:
         return {"status_code":"404", "status":"error", "msg": "Missing parameters"}
+
+    try:
+        if( json_request["test"] ):
+            payload["test"] = "true"
+        else:
+            payload["test"] = "false"
+    except:
+        payload["test"] = "false"
+
     logging.debug(f"Payload: {payload}")
     thread = Thread(target=avatar_daemon, args=(payload,))
     thread.daemon = True
@@ -177,11 +186,7 @@ def get_avatar(avatar_video_id):
     token_status = utils.token_is_valid(request.headers)
     if( not token_status == True ):
         return token_status
-    cmd = f'ls {config("AVATARS_DIR")}/{avatar_video_id}.mp4'
-    avatar_exists = False
-    if( avatar_exists ):
-        return {"status":"ready", "msg": "Your avatar is ready", "avatar":"http://127.0.0.1:8080/avatars/{avatar_video_id}"}
-    return {"status":"in progress", "msg": "Your avatar is not ready yet", "avatar":""}
+    return utils.get_last_avatar_status(avatar_video_id)
 
 '''
     Download avatar video

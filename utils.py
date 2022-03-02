@@ -1,5 +1,7 @@
+import os
 import re
 import random
+import base64
 import logging
 import string
 import requests
@@ -111,3 +113,64 @@ def text_cleaner(text):
 def text_hash(text):
     return str(abs(hash(text)))
 
+'''
+    get avatar / last avatar status
+'''
+def get_last_avatar_status(avatar_id):
+    path="C:/Vocinity/avatar-api/avatars"
+    file = f"avatar_{avatar_id}.webm"
+
+    try:
+        avatar=open(f"{path}/{file}","rb")
+        print(f"File: {file} exits")
+        print(avatar)
+        b64 = base64.b64encode(avatar.read())
+        return {"code": "200", "status":"Avatar is ready", "avatar":b64.decode('utf-8')}
+    except: 
+        print(f"File: {file} doesnt exists")
+
+    path = "C:/Vocinity/avatar-api/tmp"
+    file_name_pattern = f"step.*_{avatar_id}.*"
+
+    try:
+        tmp_videos = os.listdir(path)
+        last_avatar_video = False
+        for item in os.listdir(path):
+            if ( re.match(file_name_pattern,item) ):
+                last_avatar_video = item
+        
+        if( not last_avatar_video ):
+            return {"code": "400", "status": f"Any video for this avatar_id {avatar_id}, not found"}    
+
+        #print(f"Last avatar status: {tmp_videos[-1]} ")
+        print(f"Last avatar status: {last_avatar_video} ")
+        step = (re.search(r"^step([\d])_.*$", last_avatar_video)).group(1)
+        print(step)
+        switcher = {
+            "3": "Cropping video",
+            "4": "Adding background",
+            "5": "Enhacing video",
+            "6": "Adding overlay",
+            "7": "Finishing avatar"
+        }
+        
+        #status = switcher.get(step, "nothing") 
+        return {"code": "200", "status":switcher.get(step, "Cant find last status"), "avatar":""}
+        '''
+        status = ""
+        match step:
+            case 3:
+                status = ""
+            case 4:
+                status = ""
+            case 5:
+                status = ""
+            case 6:
+                status = ""
+            case 7:
+                status = ""
+        return {"code": "200", "status":status}
+        '''
+    except:
+        return {"code": "401", "status": f"Any video for this avatar_id {avatar_id}, not found"}
+    return True

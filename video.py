@@ -9,13 +9,13 @@ from decouple import config
 '''
     Step1 Create video on synthesia
 '''
-def create_video_on_synthesia(text,avatar,voice):
+def create_video_on_synthesia(text,avatar,voice,is_test):
     request_headers = {
         'Authorization' : config("SYNTHESIA_TOKEN"),
         'Content-Type': 'application/json'
     }
     request_data = {
-        'test': "true", 
+        'test': is_test, 
         'input': [
             {
                 "scriptText": text, 
