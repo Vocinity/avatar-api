@@ -14,7 +14,7 @@ from queue import Queue
 from decouple import config
 from threading import Thread
 from flask_cors import CORS
-from flask import Flask, request, jsonify, Response
+from flask import Flask, request, jsonify, Response, send_file
 
 
 '''
@@ -191,16 +191,21 @@ def get_avatar(avatar_video_id):
 '''
     Download avatar video
 '''
-@app.route("/avatar/download/<string:avatar_video_id>", methods = ['GET'])
-def download_avatar(avatar_video_id):
+@app.route("/avatar/download/<string:avatar_id>", methods = ['GET'])
+def download_avatar(avatar_id):
     token_status = utils.token_is_valid(request.headers)
     if( not token_status == True ):
         return token_status
-    cmd = f'ls {config("AVATARS_DIR")}/{avatar_video_id}.mp4'
-    avatar_video_is_ready = False
-    if( avatar_video_is_ready ):
-        return {"video":"mp4"}
-    return {"status":"not ready yet"}
+
+    video = f'{config("AVATARS_DIR")}/avatar_{avatar_id}.webm'
+    if( utils.file_exits(video)):
+        return send_file(video, as_attachment=True)
+    else: 
+        print(f"File: {video} doesnt exists")
+    return Response(
+        {"status":f"avatar {avatar_id} not found, or not ready"},
+        status=404
+    )
 
 '''
     Validate token endpoint
