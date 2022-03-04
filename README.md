@@ -76,7 +76,7 @@ This is a list for available API endpoints
 |test| values \[true\|false\] if true watermark is showed on avatar video, any charge applied|
 
 ## **Example:**
-> curl http://127.0.0.1:8080/avatar \
+> curl -H "X-Vocinity-Token: secure_token" http://windows-gpu1:8080/avatar \
 > { \
 	"avatar": "anna_costume1_cameraA", \
 	"voice":"18625cf6-e9ac-4680-931a-7efdac4a1a25", \
@@ -86,6 +86,14 @@ This is a list for available API endpoints
 	"hook_url":"http://{your_api_ip}:8085/avatar", \
 	"test": false \
 }
+
+<br/>
+<br/>
+
+
+## **Download video avatar Example:**
+
+> curl -H "X-Vocinity-Token: secure_token"  "http://windows-gpu1:8080/avatar/download/a3TUbzDHT9cJ62Ge4jrk" --output video.webm
 
 <br/>
 <br/>
